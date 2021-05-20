@@ -23,6 +23,8 @@
 #include "tabla_simbolos.h"
 
 extern int yylex();
+extern int yylineno;
+extern char * yytext;
 int yyerror(char const * s);
 
 %}
@@ -31,16 +33,17 @@ int yyerror(char const * s);
    convierte en definici�n de constantes en el archivo calculadora.tab.h
    que hay que incluir en el archivo de flex. */
 
-%token BEGIN_STMT END_STMT INT_DEF FLOAT_DEF IF FI ELSE WHILE 
+%token BEGIN_STMT END_STMT IF FI ELSE WHILE 
         FOR TO STEP DO READ PRINT SEMICOLON ASSIGN_TYPE ASSIGN_VALUE 
         OPEN_PAREN CLOSE_PAREN SUM SUBST MULT DIV LESSTH MORETH EQUAL 
-        LESSEQTH MOREEQTH IDENT END_OF_FILE
-%start exp
+        LESSEQTH MOREEQTH INT_DEF FLOAT_DEF IDENT
+%start prog
 
 %union {
   int intVal;
-  struct arbolNode * node;
+  struct treeNode * node;
   float floatVal;
+  char * tipo;
 }
 
 %token <intVal> ENT
@@ -49,25 +52,23 @@ int yyerror(char const * s);
 
 %%
 
-exp : prog END_OF_FILE {  }
+
+prog : opt_decls BEGIN_STMT opt_stmts END_STMT { printf("End of file\n") ; }
 ;
 
-prog : opt_decls BEGIN_STMT opt_stmts END_STMT {  }
+opt_decls : decl_lst
+          | %empty
 ;
 
-opt_decls : decl_lst {  }
-          |          {  }
+decl_lst : decl SEMICOLON decl_lst 
+         | decl                    
 ;
 
-decl_lst : decl SEMICOLON decl_lst {  }
-         | decl                    {  }
+decl : IDENT ASSIGN_TYPE tipo
 ;
 
-decl : IDENT ASSIGN_TYPE tipo {  }
-;
-
-tipo : INT_DEF    {  }
-     | FLOAT_DEF  {  }
+tipo : INT_DEF      
+     | FLOAT_DEF    
 ;
 
 stmt : IDENT ASSIGN_VALUE expr
@@ -81,7 +82,7 @@ stmt : IDENT ASSIGN_VALUE expr
 ;
 
 opt_stmts : stmt_lst
-          |
+          | %empty
 ;
 
 stmt_lst : stmt SEMICOLON stmt_lst 
@@ -115,7 +116,7 @@ expresion : expr LESSTH expr
 %%
 
 int yyerror(char const * s) {
-  fprintf(stderr, "%s\n", s);
+     printf("Error, %s: '%s' in line %d\n", s, yytext, yylineno);
 }
 
 void main() {

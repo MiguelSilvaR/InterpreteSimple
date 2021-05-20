@@ -1,0 +1,4 @@
+*.out
+tarea4.tab.*
+*.txt
+lex.yy.*
