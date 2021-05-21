@@ -45,7 +45,7 @@ DIGITO [0-9]
 "<="                                            {return LESSEQTH;}
 ">="                                            {return MOREEQTH;}
 
-({LETRA}|"_"|"$")({LETRA}|{DIGITO}|"_"|"$")*    {yylval.tipo = strdup(yytext); printf("Identificador %s\n", yytext) ;return IDENT;}
+({LETRA}|"_"|"$")({LETRA}|{DIGITO}|"_"|"$")*    {yylval.tipo = strdup(yytext);return IDENT;}
 ([1-9]{DIGITO}*)|0                              {yylval.intVal = atoi(yytext);return ENT;}
 (([1-9]{DIGITO}*)|0)"."{DIGITO}{DIGITO}*        {yylval.floatVal = atof(yytext);return FLOTANTE;}
 

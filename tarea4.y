@@ -36,24 +36,26 @@ int yyerror(char const * s);
 %token BEGIN_STMT END_STMT IF FI ELSE WHILE 
         FOR TO STEP DO READ PRINT SEMICOLON ASSIGN_TYPE ASSIGN_VALUE 
         OPEN_PAREN CLOSE_PAREN SUM SUBST MULT DIV LESSTH MORETH EQUAL 
-        LESSEQTH MOREEQTH INT_DEF FLOAT_DEF IDENT
+        LESSEQTH MOREEQTH 
 %start prog
 
 %union {
-  int intVal;
   struct treeNode * node;
-  float floatVal;
   char * tipo;
+  int intVal;
+  float floatVal;
 }
 
-%token <intVal> ENT
 %token <floatVal> FLOTANTE
+%token <intVal> ENT 
+%token <tipo> INT_DEF FLOAT_DEF IDENT
 
+%type <tipo> tipo
 
 %%
 
 
-prog : opt_decls BEGIN_STMT opt_stmts END_STMT { printf("End of file\n") ; }
+prog : opt_decls BEGIN_STMT opt_stmts END_STMT                   { printTable(); }
 ;
 
 opt_decls : decl_lst
@@ -64,21 +66,11 @@ decl_lst : decl SEMICOLON decl_lst
          | decl                    
 ;
 
-decl : IDENT ASSIGN_TYPE tipo
+decl : IDENT ASSIGN_TYPE tipo                                    { declareVariable($1,$3); }
 ;
 
-tipo : INT_DEF      
-     | FLOAT_DEF    
-;
-
-stmt : IDENT ASSIGN_VALUE expr
-     | IF OPEN_PAREN expresion CLOSE_PAREN stmt FI
-     | IF OPEN_PAREN expresion CLOSE_PAREN stmt ELSE stmt
-     | WHILE OPEN_PAREN expresion CLOSE_PAREN stmt
-     | FOR IDENT ASSIGN_VALUE expr TO expr STEP expr DO stmt
-     | READ IDENT
-     | PRINT expr
-     | BEGIN_STMT opt_stmts END_STMT
+tipo : INT_DEF                                                   { $$ = "int"; }
+     | FLOAT_DEF                                                 { $$ = "float"; }
 ;
 
 opt_stmts : stmt_lst
@@ -89,20 +81,32 @@ stmt_lst : stmt SEMICOLON stmt_lst
          | stmt
 ;
 
-expr : expr SUM term
-     | expr SUBST term
+stmt : IDENT ASSIGN_VALUE expr                                   { assignValue($1, "float" ,(int)6.1, (float)6.1); }
+     | IF OPEN_PAREN expresion CLOSE_PAREN stmt FI
+     | IF OPEN_PAREN expresion CLOSE_PAREN stmt ELSE stmt
+     | WHILE OPEN_PAREN expresion CLOSE_PAREN stmt
+     | FOR IDENT ASSIGN_VALUE expr TO expr STEP expr DO stmt
+     | READ IDENT
+     | PRINT expr
+     | BEGIN_STMT opt_stmts END_STMT
+;
+
+
+
+expr : expr SUM term                    
+     | expr SUBST term                  
      | term
 ;
 
-term : term MULT factor
-     | term DIV factor
-     | factor
+term : term MULT factor                 
+     | term DIV factor                  
+     | factor                           
 ;
 
-factor : OPEN_PAREN expr CLOSE_PAREN
-       | IDENT
-       | ENT
-       | FLOTANTE
+factor : OPEN_PAREN expr CLOSE_PAREN    
+       | IDENT                          
+       | ENT                            
+       | FLOTANTE                       
 ;
 
 expresion : expr LESSTH expr
