@@ -17,15 +17,14 @@
    Autor: Miguel Silva Ramos y Oscar Barbosa Aquino */
 
 %{
-#include<stdio.h>
-
-#include "arbol.h"
-#include "tabla_simbolos.h"
+#include "operations.h"
 
 extern int yylex();
 extern int yylineno;
+extern FILE *yyin;
 extern char * yytext;
 int yyerror(char const * s);
+struct node* root;
 
 %}
 
@@ -40,7 +39,7 @@ int yyerror(char const * s);
 %start prog
 
 %union {
-  struct treeNode * node;
+  struct node * node;
   char * tipo;
   int intVal;
   float floatVal;
@@ -51,22 +50,41 @@ int yyerror(char const * s);
 %token <tipo> INT_DEF FLOAT_DEF IDENT
 
 %type <tipo> tipo
+%type <node> decl decl_lst opt_decls prog opt_stmts stmt stmt_lst expr term factor
 
 %%
 
 
-prog : opt_decls BEGIN_STMT opt_stmts END_STMT                   { printTable(); }
+prog : opt_decls BEGIN_STMT opt_stmts END_STMT 
+     {
+          root = create_node("root", 0, 0, 0, $1, $3, NULL);;
+     }
 ;
 
 opt_decls : decl_lst
-          | %empty
+     | %empty            {$$ = NULL;}
 ;
 
-decl_lst : decl SEMICOLON decl_lst 
-         | decl                    
+decl_lst : decl SEMICOLON decl_lst
+     {
+          $1->right = $3;
+          $$ = $1;
+     }
+     | decl
 ;
 
-decl : IDENT ASSIGN_TYPE tipo                                    { declareVariable($1,$3); }
+decl : IDENT ASSIGN_TYPE tipo                                    
+     {
+          char* id = (char*)malloc(sizeof(char)*10);
+          struct node *var = (struct node *)malloc(sizeof(struct node));
+          strcpy(id, "decl_");
+          strcat(id, $1);
+          if(strcmp($3, "int")==0)
+               var = create_node($1,1,0,0,NULL,NULL,NULL);
+          else if(strcmp($3, "float")==0)
+               var = create_node($1,2,0,0,NULL,NULL,NULL);
+          $$ = create_node(id,10,0,0,var,NULL,NULL);
+     }
 ;
 
 tipo : INT_DEF                                                   { $$ = "int"; }
@@ -74,21 +92,45 @@ tipo : INT_DEF                                                   { $$ = "int"; }
 ;
 
 opt_stmts : stmt_lst
-          | %empty
+          | %empty {$$ = NULL;}
 ;
 
-stmt_lst : stmt SEMICOLON stmt_lst 
+stmt_lst : stmt SEMICOLON stmt_lst {}
          | stmt
 ;
 
-stmt : IDENT ASSIGN_VALUE expr                                   { assignValue($1, "float" ,(int)6.1, (float)6.1); }
+stmt : IDENT ASSIGN_VALUE expr                                   
+     { 
+          $$ = create_node($1, 11, 0, 0, $3, NULL, NULL);
+     }
      | IF OPEN_PAREN expresion CLOSE_PAREN stmt FI
+     {
+          $$ = NULL;
+     }
      | IF OPEN_PAREN expresion CLOSE_PAREN stmt ELSE stmt
+     {
+          $$ = NULL;
+     }
      | WHILE OPEN_PAREN expresion CLOSE_PAREN stmt
+     {
+          $$ = NULL;
+     }
      | FOR IDENT ASSIGN_VALUE expr TO expr STEP expr DO stmt
+     {
+          $$ = NULL;
+     }
      | READ IDENT
+     {
+          $$ = NULL;
+     }
      | PRINT expr
+     {
+          $$ = NULL;
+     }
      | BEGIN_STMT opt_stmts END_STMT
+     {
+          $$ = NULL;
+     }
 ;
 
 
@@ -103,10 +145,22 @@ term : term MULT factor
      | factor                           
 ;
 
-factor : OPEN_PAREN expr CLOSE_PAREN    
+factor : OPEN_PAREN expr CLOSE_PAREN 
+          {
+               $$ = NULL;
+          }
        | IDENT                          
+          {
+               $$ = create_node($1, 0, 0, 0 , NULL,NULL,NULL);
+          }
        | ENT                            
+          {
+               $$ = create_node("ent", 1, $1, 0 , NULL,NULL,NULL);
+          }
        | FLOTANTE                       
+          {
+               $$ = create_node("flt_as", 2, 0, $1 , NULL,NULL,NULL);
+          }
 ;
 
 expresion : expr LESSTH expr
@@ -123,8 +177,20 @@ int yyerror(char const * s) {
      printf("Error, %s: '%s' in line %d\n", s, yytext, yylineno);
 }
 
-void main() {
+void main(int argc, char **argv) {
+     if (argc < 2) {
+          printf ("Error, falta el nombre de un archivo\n");
+          exit(1);
+     }
 
-  yyparse();
+     yyin = fopen(argv[1], "r");
+
+     if (yyin == NULL) {
+          printf("Error: el archivo no existe\n");
+          exit(1);
+     }
+     yyparse();
+     traverse_tree(root);
+     printTable();
 }
 
