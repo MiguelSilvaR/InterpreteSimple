@@ -95,13 +95,18 @@ opt_stmts : stmt_lst
           | %empty {$$ = NULL;}
 ;
 
-stmt_lst : stmt SEMICOLON stmt_lst {}
+stmt_lst : stmt SEMICOLON stmt_lst 
+          {
+               $1->right = $3;
+               $$ = $1;
+          }
          | stmt
 ;
 
 stmt : IDENT ASSIGN_VALUE expr                                   
      { 
-          $$ = create_node($1, 11, 0, 0, $3, NULL, NULL);
+          struct node* tmp = create_node($1, 11, 0, 0, $3, NULL, NULL);
+          $$ = create_node("stmnt", 9, 0, 0, tmp, NULL, NULL);
      }
      | IF OPEN_PAREN expresion CLOSE_PAREN stmt FI
      {
@@ -135,31 +140,48 @@ stmt : IDENT ASSIGN_VALUE expr
 
 
 
-expr : expr SUM term                    
-     | expr SUBST term                  
+expr : expr SUM term
+     {
+          struct node* sum = create_node("sum", 6, 0, 0, $1, $3, NULL);
+          $$ = create_node("expr", 3, 0, 0, sum, NULL, NULL);
+     }             
+     | expr SUBST term
+     {
+          struct node* subst = create_node("subst", 7, 0, 0, $1, $3, NULL);
+          $$ = create_node("expr", 3, 0, 0, subst, NULL, NULL);
+     }
      | term
+     {
+          $$ = create_node("expr", 3, 0, 0, NULL, NULL, $1);
+     }
 ;
 
 term : term MULT factor                 
      | term DIV factor                  
-     | factor                           
+     | factor
+     {
+          $$ = create_node("term", 4, 0, 0, NULL, NULL, $1);
+     }                           
 ;
 
 factor : OPEN_PAREN expr CLOSE_PAREN 
           {
-               $$ = NULL;
+               $$ = create_node("factor", 5, 0, 0 , NULL,$2,NULL);; //Todo
           }
        | IDENT                          
           {
-               $$ = create_node($1, 0, 0, 0 , NULL,NULL,NULL);
+               struct node* temp = create_node($1, 0, 0, 0 , NULL,NULL,NULL);
+               $$ = create_node("factor", 5, 0, 0 , NULL,temp,NULL); //Regresar un identificador
           }
        | ENT                            
           {
-               $$ = create_node("ent", 1, $1, 0 , NULL,NULL,NULL);
+               struct node* temp = create_node("int", 1, $1, 0, NULL,NULL,NULL);
+               $$ = create_node("factor", 5, 0, 0 , NULL,temp,NULL);
           }
        | FLOTANTE                       
           {
-               $$ = create_node("flt_as", 2, 0, $1 , NULL,NULL,NULL);
+               struct node* temp = create_node("float", 2, 0, $1, NULL,NULL,NULL);
+               $$ = create_node("factor", 5, 0, 0 , NULL,temp,NULL);
           }
 ;
 

@@ -19,6 +19,11 @@ struct node
 		1   int
 		2	float
 		3 	expr
+		4 	term
+		5 	factor
+		6	sum
+		7	subst
+		9 	stmnt
 		10	decl
 		11	asign
 	*/
@@ -38,7 +43,7 @@ struct node *create_node(char* id, int type, int val, float f, struct node *l, s
 }
 
 void print_node(struct node *node){
-	printf("Node[id=%s type=%d int=%d float=%f left=%p right=%p]\n",node->id,node->nodeType,node->val_int,node->val_float,node->left,node->right);
+	printf("Node[id=%s type=%d int=%d float=%f left=%p right=%p other=%p]\n",node->id,node->nodeType,node->val_int,node->val_float,node->left,node->right, node->other);
 }
 
 void print_node_value(struct node *node){
@@ -79,6 +84,7 @@ void print_postorder(struct node *node){
 
 void print_preorder_complete(struct node *node){
 	if(node!=NULL){
+		printf("%p ", node);
 		print_node(node);
 		print_preorder_complete(node->left);
 		print_preorder_complete(node->right);

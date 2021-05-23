@@ -22,7 +22,7 @@ void assignValue(char * ident, char * typeExpression, int data, float fdata) {
     struct DataItem * tmp = search(ident);
     checkTypes(typeExpression, tmp->dType);
     if (strcmp(tmp->dType, "int") == 0)
-        tmp->data = data;
+        tmp->data = (int)data;
     else
         tmp->fdata = fdata;
 }
