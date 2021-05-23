@@ -96,11 +96,11 @@ opt_stmts : stmt_lst
 ;
 
 stmt_lst : stmt SEMICOLON stmt_lst 
-          {
-               $1->right = $3;
-               $$ = $1;
-          }
-         | stmt
+     {
+          $1->right = $3;
+          $$ = $1;
+     }
+     | stmt
 ;
 
 stmt : IDENT ASSIGN_VALUE expr                                   
@@ -144,7 +144,7 @@ expr : expr SUM term
      {
           struct node* sum = create_node("sum", 6, 0, 0, $1, $3, NULL);
           $$ = create_node("expr", 3, 0, 0, sum, NULL, NULL);
-     }             
+     }
      | expr SUBST term
      {
           struct node* subst = create_node("subst", 7, 0, 0, $1, $3, NULL);
@@ -156,8 +156,16 @@ expr : expr SUM term
      }
 ;
 
-term : term MULT factor                 
-     | term DIV factor                  
+term : term MULT factor
+     {
+          struct node* mult = create_node("mult", 12, 0, 0, $1, $3, NULL);
+          $$ = create_node("term", 4, 0, 0, mult, NULL, NULL);
+     }
+     | term DIV factor
+     {
+          struct node* div = create_node("div", 13, 0, 0, $1, $3, NULL);
+          $$ = create_node("term", 4, 0, 0, div, NULL, NULL);
+     }
      | factor
      {
           $$ = create_node("term", 4, 0, 0, NULL, NULL, $1);

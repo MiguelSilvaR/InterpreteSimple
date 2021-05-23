@@ -26,6 +26,8 @@ struct node
 		9 	stmnt
 		10	decl
 		11	asign
+		12 	mult
+		13 	div
 	*/
 };
 
