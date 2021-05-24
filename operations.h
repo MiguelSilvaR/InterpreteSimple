@@ -192,6 +192,7 @@ void traverse_opt_stmts(struct node *root)
             case READ_L:;
                 tmp = 0;
                 data = getIdentValue(stmnt->id);
+                printf("Reading value of %s\n", stmnt->id);
                 scanf("%f",&tmp);
                 check_types(strcmp(data->dType, "int")==0, tmp);
                 assignValue(stmnt->id, data->dType, (int)tmp, tmp);
