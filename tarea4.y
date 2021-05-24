@@ -4,16 +4,6 @@
    consisten �nicamente de sumas, restas, multiplicaciones y divisiones de
    n�meros enteros.
 
-   Para compilar y ejecutar:
-   flex calculadora.l
-   bison calculadora.y
-   gcc lex.yy.c calculadora.tab.c -lfl -lm
-   ./a.out
-
-    O de manera simplificada: 
-    flex calculadora.l && bison -d calculadora.y && gcc lex.yy.c calculadora.tab.c -lfl -lm
-    ./a.out
-
    Autor: Miguel Silva Ramos y Oscar Barbosa Aquino */
 
 %{
