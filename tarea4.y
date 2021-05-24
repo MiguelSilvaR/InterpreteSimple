@@ -244,6 +244,5 @@ void main(int argc, char **argv) {
      }
      yyparse();
      traverse_tree(root);
-     /* printTable(); */
 }
 

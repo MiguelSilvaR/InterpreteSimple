@@ -210,7 +210,6 @@ void traverse_opt_stmts(struct node *root)
 
 void traverse_tree(struct node *root)
 {
-    print_preorder_complete(root);
     set_declarations(root->left);
     traverse_opt_stmts(root->right);
 }
