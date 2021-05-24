@@ -4,6 +4,32 @@
 #include <stdio.h>
 #include <math.h>
 
+#define ID 		0
+#define INTT	1
+#define FLOATT 	2
+#define EXPR 	3
+#define TERM 	4
+#define FACTOR 	5
+#define SUM_L 	6
+#define SUB_L 	7
+#define MULT_L 	8
+#define DIV_L 	9
+#define STMNT 	10
+#define ASSIGN 	11
+#define DECL 	12
+#define IF_FI 	13
+#define IF_ELSE	14
+#define WHILE_L	15
+#define FOR_L	16
+#define TO_STEP	17
+#define READ_L	18
+#define PRINT_L	19
+#define LESS_TH 20
+#define MORE_TH 21
+#define EQUAL_L 22
+#define LESS_EQ 23
+#define	MORE_EQ 24
+
 //Estructura del arbol
 struct node
 {
@@ -23,11 +49,16 @@ struct node
 		5 	factor
 		6	sum
 		7	subst
-		9 	stmnt
-		10	decl
+		8 	mult
+		9 	div
+		10 	stmnt
 		11	asign
-		12 	mult
-		13 	div
+		12	decl
+		20 	LESS_TH
+		21	MORE_TH
+		22	EQUAL_L
+		23	LESSEQ
+		24	MOREEQ
 	*/
 };
 
