@@ -1,11 +1,12 @@
-#include "arbol.h"
 #include "tabla_simbolos.h"
 
 float traverse_factor(struct node *root);
 float traverse_term(struct node *root);
 float traverse_expr(struct node *root);
 
-void set_declarations(struct node *node)
+struct DataItem **hashtable_global;
+
+void set_declarations(struct DataItem **hashtable, struct node *node)
 {
     while (node != NULL)
     {
@@ -16,11 +17,11 @@ void set_declarations(struct node *node)
         }
         if (node->left->nodeType == INTT)
         {
-            declareVariable(node->left->id, "int");
+            declareVariable(hashtable, node->left->id, "int");
         }
         if (node->left->nodeType == FLOATT)
         {
-            declareVariable(node->left->id, "float");
+            declareVariable(hashtable, node->left->id, "float");
         }
         node = node->right;
     }
@@ -72,7 +73,7 @@ float traverse_factor(struct node *root)
     //id
     if (root->right && root->right->nodeType == ID)
     {
-        struct DataItem *data = getIdentValue(root->right->id);
+        struct DataItem *data = getIdentValue(hashtable_global, root->right->id);
         if (strcmp(data->dType, "float") == 0)
             return data->fdata;
         else
@@ -122,7 +123,7 @@ float traverse_expr(struct node *root)
     { //caso subs
         return solve_subs(root->left);
     }
-    return 123;
+    return -10000;
 }
 
 void check_types(int working_int, float tmp)
@@ -134,7 +135,7 @@ void check_types(int working_int, float tmp)
     }
 }
 
-void traverse_opt_stmts(struct node *root)
+float traverse_opt_stmts(struct node *root)
 {
     while (root != NULL)
     {
@@ -144,10 +145,10 @@ void traverse_opt_stmts(struct node *root)
         switch (stmnt->nodeType)
         {
             case DECL:;
-                data = getIdentValue(stmnt->id);
+                data = getIdentValue(hashtable_global, stmnt->id);
                 tmp = traverse_expr(stmnt->left);
                 check_types(strcmp(data->dType, "int")==0, tmp);
-                assignValue(stmnt->id, data->dType, (int)tmp, tmp);
+                assignValue(hashtable_global, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case IF_FI:;
                 if (solve_expression(stmnt->left))
@@ -167,11 +168,11 @@ void traverse_opt_stmts(struct node *root)
                 struct node *decl = stmnt->left;
                 struct node *to_step = stmnt->right;
 
-                data = getIdentValue(decl->id);
+                data = getIdentValue(hashtable_global, decl->id);
                 int working_int = strcmp(data->dType, "int") == 0 ? 1 : 0;
                 tmp = traverse_expr(decl->left);
                 check_types(working_int, tmp);
-                assignValue(decl->id, data->dType, (int)tmp, tmp);
+                assignValue(hashtable_global, decl->id, data->dType, (int)tmp, tmp);
                 float to_expr = traverse_expr(to_step->left);
                 float step_expr = traverse_expr(to_step->right);
 
@@ -191,11 +192,11 @@ void traverse_opt_stmts(struct node *root)
                 break;
             case READ_L:;
                 tmp = 0;
-                data = getIdentValue(stmnt->id);
+                data = getIdentValue(hashtable_global, stmnt->id);
                 printf("Reading value of %s\n", stmnt->id);
                 scanf("%f",&tmp);
                 check_types(strcmp(data->dType, "int")==0, tmp);
-                assignValue(stmnt->id, data->dType, (int)tmp, tmp);
+                assignValue(hashtable_global, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
                 tmp = traverse_expr(stmnt->left);
@@ -204,13 +205,20 @@ void traverse_opt_stmts(struct node *root)
                 else
                     printf("%f\n", tmp);
                 break;
+            case RTRN:;
+                return traverse_expr(root->left->left);
+                break;
         }
         root = root->right; //Next stmnt
     }
+    return FLT_MAX; //Void
 }
 
 void traverse_tree(struct node *root)
 {
-    set_declarations(root->left);
-    traverse_opt_stmts(root->right);
+    hashtable_global = create_hashtable(depth_decl(root->left));
+    set_declarations(hashtable_global, root->left);
+    float result = traverse_opt_stmts(root->other);
+    if(result!=(float)FLT_MAX)
+        printf("Return = %f\n", result);
 }

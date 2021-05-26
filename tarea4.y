@@ -25,7 +25,7 @@ struct node* root;
 %token BEGIN_STMT END_STMT IF FI ELSE WHILE 
         FOR TO STEP DO READ PRINT SEMICOLON ASSIGN_TYPE ASSIGN_VALUE 
         OPEN_PAREN CLOSE_PAREN SUM SUBST MULT DIV LESSTH MORETH EQUAL 
-        LESSEQTH MOREEQTH 
+        LESSEQTH MOREEQTH FUN RETURN COMA
 %start prog
 
 %union {
@@ -37,17 +37,19 @@ struct node* root;
 
 %token <floatVal> FLOTANTE
 %token <intVal> ENT 
-%token <tipo> INT_DEF FLOAT_DEF IDENT
+%token <tipo>  INT_DEF FLOAT_DEF IDENT
 
-%type <tipo> tipo
-%type <node> decl decl_lst opt_decls prog opt_stmts stmt stmt_lst expr term factor expresion
+%type <tipo>   tipo
+%type <node>   decl decl_lst opt_decls prog opt_stmts stmt stmt_lst expr term factor expresion
+               opt_fun_decl fun_decls fun_decl oparams params param
+          
 
 %%
 
 
-prog : opt_decls BEGIN_STMT opt_stmts END_STMT 
+prog : opt_decls opt_fun_decl BEGIN_STMT opt_stmts END_STMT 
      {
-          root = create_node("root", 0, 0, 0, $1, $3, NULL);;
+          root = create_node("root", 0, 0, 0, $1, $2, $4);
      }
 ;
 
@@ -80,6 +82,29 @@ decl : IDENT ASSIGN_TYPE tipo
 tipo : INT_DEF                                                   { $$ = "int"; }
      | FLOAT_DEF                                                 { $$ = "float"; }
 ;
+
+opt_fun_decl : fun_decls
+     | %empty            {$$ = NULL;}
+
+fun_decls : fun_decls fun_decl 
+     | fun_decl
+
+fun_decl : FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo opt_decls BEGIN_STMT opt_stmts END_STMT
+     {
+          $$ = NULL;
+     }
+     | FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo SEMICOLON
+     {
+          $$ = NULL;
+     }
+
+oparams : params
+     | %empty            {$$ = NULL;}
+
+params : param COMA params
+     | param
+
+param : decl
 
 opt_stmts : stmt_lst
           | %empty {$$ = NULL;}
@@ -134,9 +159,12 @@ stmt : IDENT ASSIGN_VALUE expr
      {
           $$ = $2;
      }
+     | RETURN expr
+     {
+          struct node* tmp = create_node("return", RTRN, 0, 0, $2, NULL, NULL);
+          $$ = create_node("stmnt", STMNT, 0, 0, tmp, NULL, NULL);
+     }
 ;
-
-
 
 expr : expr SUM term
      {
@@ -209,7 +237,7 @@ expresion : expr LESSTH expr
           }
           | expr MOREEQTH expr
           {
-               $$ = create_node("more_equal", LESS_EQ, 0, 0, $1, $3, NULL);
+               $$ = create_node("more_equal", MORE_EQ, 0, 0, $1, $3, NULL);
           }
 ;
 

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 
 #define ID 		0
 #define INTT	1
@@ -29,6 +30,7 @@
 #define EQUAL_L 22
 #define LESS_EQ 23
 #define	MORE_EQ 24
+#define RTRN	25
 
 //Estructura del arbol
 struct node
@@ -73,6 +75,15 @@ struct node *create_node(char* id, int type, int val, float f, struct node *l, s
 	temp->right = r;
 	temp->other = o;
 	return temp;
+}
+
+int depth_decl(struct node* root){
+	int level = 0;
+	while(root!=NULL){
+		level++;
+		root=root->right;
+	}
+	return level;
 }
 
 void print_node(struct node *node){

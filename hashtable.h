@@ -13,9 +13,12 @@ struct DataItem
     float fdata;
 };
 
-struct DataItem *hashArray[SIZE];
 struct DataItem *dummyItem;
 struct DataItem *item;
+
+struct DataItem** create_hashtable(int size){
+    return (struct DataItem**)malloc(sizeof(struct DataItem)*SIZE);
+}
 
 int hashCode(char *key)
 {
@@ -26,7 +29,7 @@ int hashCode(char *key)
     return hash % SIZE;
 }
 
-struct DataItem *search(char *key)
+struct DataItem *search(struct DataItem **hashArray, char *key)
 {
     int hashIndex = hashCode(key);
     while (hashArray[hashIndex] != NULL)
@@ -40,7 +43,7 @@ struct DataItem *search(char *key)
     return NULL;
 }
 
-void insert(char *key, int data, float fdata, char *dType)
+void insert(struct DataItem **hashArray, char *key, int data, float fdata, char *dType)
 {
     struct DataItem *item = (struct DataItem *)malloc(sizeof(struct DataItem));
     if (strcmp(dType, "float") == 0)
@@ -58,7 +61,7 @@ void insert(char *key, int data, float fdata, char *dType)
     hashArray[hashIndex] = item;
 }
 
-struct DataItem *removeItem(char * key)
+struct DataItem *removeItem(struct DataItem **hashArray, char * key)
 {
     int hashIndex = hashCode(key);
     while (hashArray[hashIndex] != NULL)
@@ -75,13 +78,13 @@ struct DataItem *removeItem(char * key)
     return NULL;
 }
 
-void display()
+void display(struct DataItem **hashArray)
 {
     int i = 0;
     for (i = 0; i < SIZE; i++)
     {
         if (hashArray[i] != NULL)
-            printf("%d - (%s,%d,%2f,%s)\n", i, hashArray[i]->key, hashArray[i]->data, hashArray[i]->fdata, hashArray[i]->dType);
+            printf("%d - (%s, %d, %2f, %s)\n", i, hashArray[i]->key, hashArray[i]->data, hashArray[i]->fdata, hashArray[i]->dType);
         else
             printf("%d - ..\n", i);
     }

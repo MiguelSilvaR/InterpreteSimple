@@ -1,13 +1,13 @@
-#include "hashtable.h"
+#include "table.h"
 
 int yyerror(char const * s);
 
-void declareVariable(char * ident, char * type) {
-    insert(ident,0,0.0,type);
+void declareVariable(struct DataItem **hashArray, char * ident, char * type) {
+    insert(hashArray, ident, 0, 0.0, type);
 }
 
-struct DataItem * getIdentValue(char * ident) {
-    struct DataItem * tmp = search(ident);
+struct DataItem * getIdentValue(struct DataItem **hashArray, char * ident) {
+    struct DataItem * tmp = search(hashArray, ident);
     return tmp;
 }
 
@@ -18,8 +18,8 @@ void checkTypes(char * type1, char * type2) {
     }
 }
 
-void assignValue(char * ident, char * typeExpression, int data, float fdata) {
-    struct DataItem * tmp = search(ident);
+void assignValue(struct DataItem **hashArray, char * ident, char * typeExpression, int data, float fdata) {
+    struct DataItem * tmp = search(hashArray, ident);
     checkTypes(typeExpression, tmp->dType);
     if (strcmp(tmp->dType, "int") == 0)
         tmp->data = (int)data;
@@ -27,6 +27,6 @@ void assignValue(char * ident, char * typeExpression, int data, float fdata) {
         tmp->fdata = fdata;
 }
 
-void printTable() {
-    display();
+void printTable(struct DataItem **hashArray) {
+    display(hashArray);
 }
