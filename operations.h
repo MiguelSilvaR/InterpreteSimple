@@ -5,6 +5,7 @@ float traverse_term(struct node *root);
 float traverse_expr(struct node *root);
 
 struct DataItem **hashtable_global;
+struct function **function_table;
 
 void set_declarations(struct DataItem **hashtable, struct node *node)
 {
@@ -66,31 +67,29 @@ int solve_expression(struct node *root)
 float traverse_factor(struct node *root)
 {
     //(expr)
-    if (root->right && root->right->nodeType == EXPR)
+    if (root->left && root->left->nodeType == EXPR)
     {
-        return traverse_expr(root->right);
+        return traverse_expr(root->left);
     }
     //id
-    if (root->right && root->right->nodeType == ID)
+    if (root->left && root->left->nodeType == ID)
     {
-        struct DataItem *data = getIdentValue(hashtable_global, root->right->id);
+        struct DataItem *data = getIdentValue(hashtable_global, root->left->id);
         if (strcmp(data->dType, "float") == 0)
             return data->fdata;
         else
             return data->data;
     }
     //INT
-    if (root->right && root->right->nodeType == INTT)
+    if (root->left && root->left->nodeType == INTT)
     {
-        return root->right->val_int;
+        return root->left->val_int;
     }
     //FLOAT
-    if (root->right && root->right->nodeType == FLOATT)
+    if (root->left && root->left->nodeType == FLOATT)
     {
-        return root->right->val_float;
+        return root->left->val_float;
     }
-    yyerror("Error in traverse factor");
-    exit(1);
 }
 
 float traverse_term(struct node *root)
@@ -111,9 +110,9 @@ float traverse_term(struct node *root)
 
 float traverse_expr(struct node *root)
 {
-    if (root->left == NULL && root->right == NULL && root->other != NULL && root->other->nodeType == TERM)
+    if (root->right == NULL && root->other == NULL && root->left != NULL && root->left->nodeType == TERM)
     { //caso term solo
-        return traverse_term(root->other);
+        return traverse_term(root->left);
     }
     if (root->left != NULL && root->left->nodeType == SUM_L)
     { //caso sum
@@ -214,10 +213,29 @@ float traverse_opt_stmts(struct node *root)
     return FLT_MAX; //Void
 }
 
+void set_functions(struct node* root){
+    if(root==NULL)
+        return;
+    function_table = create_table_functions();
+    while(root){
+        switch(root->nodeType){
+            case FN_DECL:
+                insert_function_decl(function_table, root);
+                break;
+            case FN_DEF:
+                insert_function_def(function_table, root);
+                break;
+        }
+        root = root->other;
+    }
+}
+
 void traverse_tree(struct node *root)
 {
-    hashtable_global = create_hashtable(depth_decl(root->left));
+    // print_preorder_complete(root);
+    hashtable_global = create_hashtable();
     set_declarations(hashtable_global, root->left);
+    set_functions(root->right);
     float result = traverse_opt_stmts(root->other);
     if(result!=(float)FLT_MAX)
         printf("Return = %f\n", result);

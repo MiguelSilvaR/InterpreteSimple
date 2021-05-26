@@ -15,6 +15,7 @@ extern FILE *yyin;
 extern char * yytext;
 int yyerror(char const * s);
 struct node* root;
+int flag_function_expr = 0;
 
 %}
 
@@ -41,7 +42,7 @@ struct node* root;
 
 %type <tipo>   tipo
 %type <node>   decl decl_lst opt_decls prog opt_stmts stmt stmt_lst expr term factor expresion
-               opt_fun_decl fun_decls fun_decl oparams params param
+               opt_fun_decl fun_decls fun_decl oparams params param opt_exprs expr_lst
           
 
 %%
@@ -86,22 +87,37 @@ tipo : INT_DEF                                                   { $$ = "int"; }
 opt_fun_decl : fun_decls
      | %empty            {$$ = NULL;}
 
-fun_decls : fun_decls fun_decl 
+fun_decls : fun_decl fun_decls
+     {
+          $1->other = $2;
+          $$ = $1;
+     }
      | fun_decl
 
-fun_decl : FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo opt_decls BEGIN_STMT opt_stmts END_STMT
+fun_decl : FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo SEMICOLON
      {
-          $$ = NULL;
+          if(strcmp($7, "int") == 0)
+               $$ = create_node($2, FN_DECL, INTT, 0, $4, NULL, NULL);
+          else
+               $$ = create_node($2, FN_DECL, FLOATT, 0, $4, NULL, NULL);
      }
-     | FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo SEMICOLON
+     | FUN IDENT OPEN_PAREN oparams CLOSE_PAREN ASSIGN_TYPE tipo opt_decls BEGIN_STMT opt_stmts END_STMT
      {
-          $$ = NULL;
+          struct node* temp = create_node("optdecls_optstmnts", 0, 0, 0, $8, $10, NULL);
+          if(strcmp($7, "int") == 0)
+               $$ = create_node($2, FN_DEF, INTT, 0, $4, temp, NULL);
+          else
+               $$ = create_node($2, FN_DEF, FLOATT, 0, $4, temp, NULL);
      }
 
 oparams : params
      | %empty            {$$ = NULL;}
 
 params : param COMA params
+     {
+          $1->other = $3;
+          $$ = $1;
+     }
      | param
 
 param : decl
@@ -178,7 +194,7 @@ expr : expr SUM term
      }
      | term
      {
-          $$ = create_node("expr", EXPR, 0, 0, NULL, NULL, $1);
+          $$ = create_node("expr", EXPR, 0, 0, $1, NULL, NULL);
      }
 ;
 
@@ -200,24 +216,38 @@ term : term MULT factor
 
 factor : OPEN_PAREN expr CLOSE_PAREN 
           {
-               $$ = create_node("factor", FACTOR, 0, 0 , NULL,$2,NULL);; //Todo
+               $$ = create_node("factor", FACTOR, 0, 0 , $2, NULL ,NULL);; //Todo
           }
-       | IDENT                          
+     | IDENT                          
           {
                struct node* temp = create_node($1, 0, 0, 0 , NULL,NULL,NULL);
-               $$ = create_node("factor", FACTOR, 0, 0 , NULL,temp,NULL); //Regresar un identificador
+               $$ = create_node("factor", FACTOR, 0, 0 , temp, NULL, NULL); //Regresar un identificador
           }
-       | ENT                            
+     | ENT                            
           {
                struct node* temp = create_node("int", INTT, $1, 0, NULL,NULL,NULL);
-               $$ = create_node("factor", FACTOR, 0, 0 , NULL,temp,NULL);
+               $$ = create_node("factor", FACTOR, 0, 0 , temp, NULL, NULL);
           }
-       | FLOTANTE                       
+     | FLOTANTE                       
           {
                struct node* temp = create_node("float", FLOATT, 0, $1, NULL,NULL,NULL);
-               $$ = create_node("factor", FACTOR, 0, 0 , NULL,temp,NULL);
+               $$ = create_node("factor", FACTOR, 0, 0 , temp, NULL, NULL);
+          }
+     | IDENT OPEN_PAREN opt_exprs CLOSE_PAREN
+          {
+               struct node* temp = create_node($1, FN_CALL, 0, 0, $3, NULL,NULL);
+               $$ = create_node("factor", FACTOR, 0, 0 , temp, NULL, NULL);
           }
 ;
+
+opt_exprs : expr_lst
+
+expr_lst : expr COMA expr_lst
+     {
+          $1->right = $3;
+          $$ = $1;
+     }
+     | expr
 
 expresion : expr LESSTH expr
           {
@@ -246,6 +276,7 @@ expresion : expr LESSTH expr
 
 int yyerror(char const * s) {
      printf("Error, %s: '%s' in line %d\n", s, yytext, yylineno);
+     exit(1);
 }
 
 void main(int argc, char **argv) {

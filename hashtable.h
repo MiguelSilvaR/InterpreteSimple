@@ -16,7 +16,7 @@ struct DataItem
 struct DataItem *dummyItem;
 struct DataItem *item;
 
-struct DataItem** create_hashtable(int size){
+struct DataItem** create_hashtable(){
     return (struct DataItem**)malloc(sizeof(struct DataItem)*SIZE);
 }
 
@@ -39,7 +39,6 @@ struct DataItem *search(struct DataItem **hashArray, char *key)
         ++hashIndex;
         hashIndex %= SIZE;
     }
-
     return NULL;
 }
 

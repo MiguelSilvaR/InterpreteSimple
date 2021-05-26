@@ -31,6 +31,9 @@
 #define LESS_EQ 23
 #define	MORE_EQ 24
 #define RTRN	25
+#define FN_CALL	26
+#define FN_DECL	27
+#define FN_DEF 	28
 
 //Estructura del arbol
 struct node
@@ -77,17 +80,17 @@ struct node *create_node(char* id, int type, int val, float f, struct node *l, s
 	return temp;
 }
 
-int depth_decl(struct node* root){
+int depth_other(struct node* root){
 	int level = 0;
 	while(root!=NULL){
 		level++;
-		root=root->right;
+		root=root->other;
 	}
 	return level;
 }
 
 void print_node(struct node *node){
-	printf("Node[id=%s type=%d int=%d float=%f left=%p right=%p other=%p]\n",node->id,node->nodeType,node->val_int,node->val_float,node->left,node->right, node->other);
+	printf("%p Node[id=%s type=%d int=%d float=%f left=%p right=%p other=%p]\n", node, node->id,node->nodeType,node->val_int,node->val_float,node->left,node->right, node->other);
 }
 
 void print_node_value(struct node *node){
@@ -128,7 +131,6 @@ void print_postorder(struct node *node){
 
 void print_preorder_complete(struct node *node){
 	if(node!=NULL){
-		printf("%p ", node);
 		print_node(node);
 		print_preorder_complete(node->left);
 		print_preorder_complete(node->right);
