@@ -4,7 +4,7 @@
    consisten �nicamente de sumas, restas, multiplicaciones y divisiones de
    n�meros enteros.
 
-   Autor: Miguel Silva Ramos y Oscar Barbosa Aquino */
+   Autor: Miguel Silva Ramos, Oscar Barbosa Aquino, Fernando Rodríguez Robles*/
 
 %{
 #include "operations.h"
