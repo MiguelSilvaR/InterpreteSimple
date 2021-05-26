@@ -5,13 +5,13 @@ begin
   x <- 5;
   z <- 1;
   for
-    y <- 1
+    y <- 0
   to
-    y  5
+    x
   step
     y + 1
   do
-    z <- z * 2;
+    z <- z + 2;
   print x;
   print y;
   print z
