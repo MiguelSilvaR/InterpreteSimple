@@ -1,0 +1,9 @@
+x : float;
+y : float;
+z : int
+begin
+  x <- 1.2;
+  y <- 2.0;
+  z <- 3;
+  x <- 1.2 * (2.0 + 1.5)
+end

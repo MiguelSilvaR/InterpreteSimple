@@ -1,0 +1,9 @@
+x : float;
+y : float
+begin
+  x <- 1.5;
+  y <- 2.3;
+  while (x < 8.0)
+    x <- x + 1.0;
+  print x
+end

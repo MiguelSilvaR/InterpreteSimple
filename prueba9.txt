@@ -1,0 +1,10 @@
+x : float;
+y : float
+begin
+  x <- 1.5;
+  y <- 2.3;
+  if (x < 8.0)
+    x <- x - 1.0
+  fi;
+  print x
+end
