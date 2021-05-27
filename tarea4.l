@@ -29,6 +29,7 @@ BLANKSPACE([ ])+
 "do"                                            {return DO;}
 "read"                                          {return READ;}
 "print"                                         {return PRINT;}
+"printe"                                        {return PRINTE;}
 "fun"                                           {return FUN;}
 "return"                                        {return RETURN;}
 

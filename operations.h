@@ -140,7 +140,6 @@ void check_types(int working_int, float tmp)
 
 float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
 {
-    float ret = FLT_MAX;
     while (root != NULL)
     {
         struct node *stmnt = root->left;
@@ -219,27 +218,29 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 if(data!=NULL)
                     data->def++;
                 data = getIdentValue(hashtable, stmnt->id);
-                printf("Reading value of %s\n", stmnt->id);
                 scanf("%f",&tmp);
                 check_types(strcmp(data->dType, "int")==0, tmp);
                 assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
-                printf("Going to print\n");
                 tmp = traverse_expr(hashtable, stmnt->left);
                 if(floorf(tmp) == tmp)
-                    printf("%d\n", (int)tmp);
+                    if(stmnt->val_int)
+                        printf("%d", (int)tmp);
+                    else
+                        printf("%d\n", (int)tmp);
                 else
-                    printf("%f\n", tmp);
+                    if(stmnt->val_int)
+                        printf("%f", tmp);
+                    else
+                        printf("%f\n", tmp);
                 break;
             case RTRN:;
-                float ret = traverse_expr(hashtable, root->left->left);
                 return traverse_expr(hashtable, root->left->left);
-                break;
         }
         root = root->right; //Next stmnt
     }
-    return ret; //Void
+    return FLT_MAX; //Void
 }
 
 void set_parameters(struct DataItem** hashtable, struct DataItem** myTable, struct function* function, struct node* expr){
