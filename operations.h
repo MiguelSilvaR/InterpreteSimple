@@ -152,6 +152,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
         switch (stmnt->nodeType)
         {
             case DECL:;
+                data = search(hashtable, stmnt->id);
+                if(data!=NULL)
+                    data->def++;
                 data = getIdentValue(hashtable, stmnt->id);
                 tmp = traverse_expr(hashtable, stmnt->left);
                 check_types(strcmp(data->dType, "int")==0, tmp);
@@ -199,6 +202,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 break;
             case READ_L:;
                 tmp = 0;
+                data = search(hashtable, stmnt->id);
+                if(data!=NULL)
+                    data->def++;
                 data = getIdentValue(hashtable, stmnt->id);
                 printf("Reading value of %s\n", stmnt->id);
                 scanf("%f",&tmp);

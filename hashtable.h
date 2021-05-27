@@ -11,6 +11,7 @@ struct DataItem
     char *dType;
     int data;
     float fdata;
+    int def;
 };
 
 struct DataItem *dummyItem;
@@ -56,6 +57,7 @@ void insert(struct DataItem **hashArray, char *key, int data, float fdata, char 
         item->data = data;
     item->key = strdup(key);
     item->dType = strdup(dType);
+    item->def = 0;
     while (hashArray[hashIndex] != NULL && hashArray[hashIndex]->key != NULL)
     {
         ++hashIndex;

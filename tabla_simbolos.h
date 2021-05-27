@@ -4,8 +4,8 @@ int yyerror(char const * s);
 
 struct DataItem * getIdentValue(struct DataItem **hashArray, char * ident) {
     struct DataItem * tmp = search(hashArray, ident);
-    if(tmp==NULL){
-        printf("Error, variable no declarada %s\n", ident);
+    if(tmp==NULL || tmp->def == 0){
+        printf("Error, variable no definida %s\n", ident);
         exit(1);
     }
     return tmp;
@@ -25,6 +25,7 @@ void assignValue(struct DataItem **hashArray, char * ident, char * typeExpressio
         tmp->data = (int)data;
     else
         tmp->fdata = fdata;
+    tmp->def = 1;
 }
 
 void printTable(struct DataItem **hashArray) {
