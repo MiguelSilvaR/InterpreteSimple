@@ -18,13 +18,9 @@ void set_declarations(struct DataItem **hashtable, struct node *node)
             exit(1);
         }
         if (node->left->nodeType == INTT)
-        {
             declareVariable(hashtable, node->left->id, "int");
-        }
         if (node->left->nodeType == FLOATT)
-        {
             declareVariable(hashtable, node->left->id, "float");
-        }
         node = node->right;
     }
 }
@@ -177,7 +173,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
             case FOR_L:;
                 struct node *decl = stmnt->left;
                 struct node *to_step = stmnt->right;
-
+                data = search(hashtable, decl->id);
+                if(data!=NULL)
+                    data->def++;
                 data = getIdentValue(hashtable, decl->id);
                 int working_int = strcmp(data->dType, "int") == 0 ? 1 : 0;
                 tmp = traverse_expr(hashtable, decl->left);
@@ -231,7 +229,10 @@ void set_parameters(struct DataItem** hashtable, struct function* function, stru
     if(depth_right(expr)!=depth_other(function->params))
         printf("Error en el numero de parametros\n");
     for (size_t i = 0; i <= depth_right(expr); i++)
-    {
+    {        
+        struct DataItem* tmp = search(function->hashtable_local, function->ids[i]);
+        if(tmp!=NULL)
+            tmp->def++;
         float val = traverse_expr(hashtable, expr);
         struct DataItem* data = getIdentValue(function->hashtable_local, function->ids[i]);
         check_types(strcmp(data->dType, "int")==0, val);
