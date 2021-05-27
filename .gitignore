@@ -2,3 +2,7 @@
 tarea4.tab.*
 *.txt
 lex.yy.*
+*.pdf
+in*
+program
+out
