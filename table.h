@@ -8,8 +8,7 @@ struct function{
     struct node* params; //parameters
     struct node* stmnts; //Opt_stmnts
     struct node* decl; //decl
-    struct DataItem **hashtable_local;
-    struct DataItem **hashtable_original;
+    struct DataItem **hashtable;
 };
 
 struct function* search_f(struct function** hashArray, char* id){
@@ -61,9 +60,8 @@ void insert_function_decl(struct function** table, struct node* root){
     f->return_type = root->val_int;
     f->ids = (char**)malloc(sizeof(char)*depth_other(f->params));
     f->params = root->left;
-    f->hashtable_local = create_hashtable();
-    set_variables(f->hashtable_local, f->ids, root->left);
-    f->hashtable_original = copy_table(f->hashtable_local);
+    f->hashtable = create_hashtable();;
+    set_variables(f->hashtable, f->ids, root->left);
     insert_function(table, hashIndex, f);
 }
 
@@ -78,9 +76,8 @@ void insert_function_def(struct function** table, struct node* root){
         f->params = root->left;
         f->decl = root->right->left;
         f->stmnts = root->right->right;
-        f->hashtable_local = create_hashtable();
-        set_variables(f->hashtable_local, f->ids, root->left);
-        f->hashtable_original = copy_table(f->hashtable_local);
+        f->hashtable = create_hashtable();;
+        set_variables(f->hashtable, f->ids, root->left);
         insert_function(table, hashIndex, f);
     }
     else{

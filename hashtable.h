@@ -116,8 +116,6 @@ void display(struct DataItem **hashArray)
     {
         if (hashArray[i] != NULL)
             printf("%d - (%s, %d, %2f, %s)\n", i, hashArray[i]->key, hashArray[i]->data, hashArray[i]->fdata, hashArray[i]->dType);
-        else
-            printf("%d - ..\n", i);
     }
     printf("\n");
 }

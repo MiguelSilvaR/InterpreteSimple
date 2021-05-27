@@ -89,7 +89,7 @@ float traverse_factor(struct DataItem **hashtable, struct node *root)
     }
     //Function
     if (root->left && root->left->nodeType == FN_CALL)
-    {
+    {  
         return solve_function(hashtable, root->left);
     }
     
@@ -140,6 +140,7 @@ void check_types(int working_int, float tmp)
 
 float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
 {
+    float ret = FLT_MAX;
     while (root != NULL)
     {
         struct node *stmnt = root->left;
@@ -157,18 +158,30 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case IF_FI:;
-                if (solve_expression(hashtable, stmnt->left))
-                    traverse_opt_stmts(hashtable, stmnt->right);
+                if (solve_expression(hashtable, stmnt->left)){
+                    tmp = traverse_opt_stmts(hashtable, stmnt->right);
+                    if(tmp!=FLT_MAX)
+                        return tmp;
+                }
                 break;
             case IF_ELSE:;
-                if (solve_expression(hashtable, stmnt->left))
-                    traverse_opt_stmts(hashtable, stmnt->right);
-                else
-                    traverse_opt_stmts(hashtable, stmnt->other);
+                if (solve_expression(hashtable, stmnt->left)){
+                    tmp = traverse_opt_stmts(hashtable, stmnt->right);
+                    if(tmp!=FLT_MAX)
+                        return tmp;
+                }
+                else{
+                    tmp = traverse_opt_stmts(hashtable, stmnt->other);
+                    if(tmp!=FLT_MAX)
+                        return tmp;
+                }
                 break;
             case WHILE_L:;
-                while (solve_expression(hashtable, stmnt->left))
-                    traverse_opt_stmts(hashtable, stmnt->right);
+                while (solve_expression(hashtable, stmnt->left)){
+                    tmp = traverse_opt_stmts(hashtable, stmnt->right);
+                    if(tmp!=FLT_MAX)
+                        return tmp;
+                }
                 break;
             case FOR_L:;
                 struct node *decl = stmnt->left;
@@ -191,7 +204,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 }
                 while ((working_int ? data->data : data->fdata) != to_expr)
                 {
-                    traverse_opt_stmts(hashtable, stmnt->other);
+                    tmp = traverse_opt_stmts(hashtable, stmnt->other);
+                    if(tmp!=FLT_MAX)
+                        return tmp;
                     if (working_int)
                         data->data += (int)step_expr;
                     else
@@ -210,6 +225,7 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
+                printf("Going to print\n");
                 tmp = traverse_expr(hashtable, stmnt->left);
                 if(floorf(tmp) == tmp)
                     printf("%d\n", (int)tmp);
@@ -217,37 +233,46 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                     printf("%f\n", tmp);
                 break;
             case RTRN:;
+                float ret = traverse_expr(hashtable, root->left->left);
                 return traverse_expr(hashtable, root->left->left);
                 break;
         }
         root = root->right; //Next stmnt
     }
-    return FLT_MAX; //Void
+    return ret; //Void
 }
 
-void set_parameters(struct DataItem** hashtable, struct function* function, struct node* expr){
+void set_parameters(struct DataItem** hashtable, struct DataItem** myTable, struct function* function, struct node* expr){
     if(depth_right(expr)!=depth_other(function->params))
         printf("Error en el numero de parametros\n");
     for (size_t i = 0; i <= depth_right(expr); i++)
     {        
-        struct DataItem* tmp = search(function->hashtable_local, function->ids[i]);
+        struct DataItem* tmp = search(myTable, function->ids[i]);
         if(tmp!=NULL)
             tmp->def++;
         float val = traverse_expr(hashtable, expr);
-        struct DataItem* data = getIdentValue(function->hashtable_local, function->ids[i]);
+        struct DataItem* data = getIdentValue(myTable, function->ids[i]);
         check_types(strcmp(data->dType, "int")==0, val);
-        assignValue(function->hashtable_local, data->key, data->dType, (int)val, val);
+        assignValue(myTable, data->key, data->dType, (int)val, val);
         expr = expr->right;
     }
 }
 
 float solve_function(struct DataItem** hashtable, struct node* root){
     struct function* function = search_f(function_table, root->id);
-    set_parameters(hashtable, function, root->left);
-    set_declarations(function->hashtable_local, function->decl);
-    float result = traverse_opt_stmts(function->hashtable_local, function->stmnts);
+    struct DataItem** myTable = copy_table(function->hashtable);
+    if(function==NULL){
+        printf("Funcion no declarada, %s\n", root->id);
+        exit(1);
+    }
+    set_parameters(hashtable, myTable, function, root->left);
+    set_declarations(myTable, function->decl);
+    if(function->stmnts==NULL){
+        printf("Function not defined %s\n", function->id);
+        exit(1);
+    }
+    float result = traverse_opt_stmts(myTable, function->stmnts);
     check_types(strcmp(function->return_type == 0 ? "int":"float", "int")==0, result);
-    function->hashtable_local = copy_table(function->hashtable_original);
     return function->return_type == 0 ? (int)result:result;
 }
 
