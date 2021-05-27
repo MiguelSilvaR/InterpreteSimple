@@ -6,6 +6,7 @@ float traverse_expr(struct DataItem **hashtable, struct node *root);
 float solve_function(struct DataItem** hashtable, struct node *root);
 
 struct DataItem **hashtable_global;
+struct DataItem **hashtable_main;
 struct function **function_table;
 
 char* parse(char* str){
@@ -22,8 +23,76 @@ char* parse(char* str){
     }
 }
 
+void set_data(struct DataItem **hashtable, char* key, char* dType, int ival, float fval){
+    struct DataItem* tmp = search(hashtable, key);
+    if(tmp){
+        assignValue(hashtable, key, tmp->dType, (int)ival, fval);
+    }
+    else{
+        tmp = search(hashtable_global, key);
+        if(!tmp){
+            printf("set_data: Variable not found %s\n",key);
+            exit(1);
+        }
+        assignValue(hashtable_global, key, tmp->dType, (int)ival, fval);
+    }
+}
+
+struct DataItem *get_data(struct DataItem **hashtable, char* key){
+    struct DataItem* tmp = search(hashtable, key);
+    if(tmp){
+        if(tmp->def>0)
+            return tmp;
+        else{
+            printf("get_data: Variable not defined %s\n", key);
+            exit(1);
+        }
+    }
+    else{
+        tmp = search(hashtable_global, key); //Buscar en global
+        if(tmp==NULL)
+            return NULL;
+        if(tmp->def==0){
+            printf("get_data: Variable not declared %s\n", key);
+            exit(1);
+        }
+        return tmp;
+    }
+}
+
+struct DataItem *get_data_nf(struct DataItem **hashtable, char* key){
+    struct DataItem* tmp = search(hashtable, key);
+    if(tmp){
+        return tmp;
+    }
+    else{
+        tmp = search(hashtable_global, key); //Buscar en global
+        if(!tmp){
+            printf("get_data: Variable not declared %s\n", key);
+            exit(1);
+        }
+        return tmp;
+    }
+}
+
+void def(struct DataItem **hashtable, char* key){
+    struct DataItem* tmp = search(hashtable, key);
+    if(tmp)
+        tmp->def++;
+    else{
+        tmp = search(hashtable_global, key); //Buscar en global
+        if(tmp)
+            tmp->def++;
+        else{
+            printf("def: Variable not declared %s\n", key);
+            exit(1);
+        }
+    }
+}
+
 void set_declarations(struct DataItem **hashtable, struct node *node)
 {
+    struct DataItem *data;
     while (node != NULL)
     {
         if (node->nodeType != DECL)
@@ -31,10 +100,22 @@ void set_declarations(struct DataItem **hashtable, struct node *node)
             printf("Error, no se encontro una declaracion\n");
             exit(1);
         }
-        if (node->left->nodeType == INTT)
+        if (node->left->nodeType == INTT){
+            data = search(hashtable_global, node->left->id);
+            if(data){
+                printf("Variable already declared in global scope %s\n", node->left->id);
+                exit(1);
+            }
             declareVariable(hashtable, node->left->id, "int");
-        if (node->left->nodeType == FLOATT)
+        }
+        if (node->left->nodeType == FLOATT){
+            data = search(hashtable_global, node->left->id);
+            if(data){
+                printf("Variabla already declared in global scope %s", node->left->id);
+                exit(1);
+            }
             declareVariable(hashtable, node->left->id, "float");
+        }
         node = node->right;
     }
 }
@@ -85,7 +166,7 @@ float traverse_factor(struct DataItem **hashtable, struct node *root)
     //id
     if (root->left && root->left->nodeType == ID)
     {
-        struct DataItem *data = getIdentValue(hashtable, root->left->id);
+        struct DataItem *data = get_data(hashtable, root->left->id);
         if (strcmp(data->dType, "float") == 0)
             return data->fdata;
         else
@@ -152,61 +233,71 @@ void check_types(int working_int, float tmp)
     }
 }
 
+void check_if_def(struct DataItem* tmp, char* key){
+    if(tmp==NULL || tmp->def == 0){
+        printf("Error, variable not defined %s\n", key);
+        exit(1);
+    }
+}
+
 float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
 {
     while (root != NULL)
     {
         struct node *stmnt = root->left;
-        struct DataItem *data = NULL;
         float tmp = 0;
+        struct DataItem *data;
         switch (stmnt->nodeType)
         {
             case DECL:;
-                data = search(hashtable, stmnt->id);
-                if(data!=NULL)
-                    data->def++;
-                data = getIdentValue(hashtable, stmnt->id);
                 tmp = traverse_expr(hashtable, stmnt->left);
-                check_types(strcmp(data->dType, "int")==0, tmp);
-                assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
+                data = get_data_nf(hashtable, stmnt->id);
+                if(data){
+                    check_types(strcmp(data->dType, "int")==0, tmp);
+                    set_data(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
+                    def(hashtable, stmnt->id);
+                }
+                else{
+                    printf("No se encontro variable %s\n", stmnt->id);
+                    exit(1);
+                }
                 break;
             case IF_FI:;
                 if (solve_expression(hashtable, stmnt->left)){
                     tmp = traverse_opt_stmts(hashtable, stmnt->right);
-                    if(tmp!=FLT_MAX)
-                        return tmp;
+                    if(tmp!=FLT_MAX) return tmp;
                 }
                 break;
             case IF_ELSE:;
                 if (solve_expression(hashtable, stmnt->left)){
                     tmp = traverse_opt_stmts(hashtable, stmnt->right);
-                    if(tmp!=FLT_MAX)
-                        return tmp;
+                    if(tmp!=FLT_MAX) return tmp;
                 }
                 else{
                     tmp = traverse_opt_stmts(hashtable, stmnt->other);
-                    if(tmp!=FLT_MAX)
-                        return tmp;
+                    if(tmp!=FLT_MAX) return tmp;
                 }
                 break;
             case WHILE_L:;
                 while (solve_expression(hashtable, stmnt->left)){
                     tmp = traverse_opt_stmts(hashtable, stmnt->right);
-                    if(tmp!=FLT_MAX)
-                        return tmp;
+                    if(tmp!=FLT_MAX) return tmp;
                 }
                 break;
             case FOR_L:;
                 struct node *decl = stmnt->left;
                 struct node *to_step = stmnt->right;
-                data = search(hashtable, decl->id);
-                if(data!=NULL)
-                    data->def++;
-                data = getIdentValue(hashtable, decl->id);
-                int working_int = strcmp(data->dType, "int") == 0 ? 1 : 0;
+                
                 tmp = traverse_expr(hashtable, decl->left);
-                check_types(working_int, tmp);
-                assignValue(hashtable, decl->id, data->dType, (int)tmp, tmp);
+                data = get_data_nf(hashtable, decl->id);
+                int working_int = strcmp(data->dType, "int") == 0 ? 1 : 0;                
+                
+                if(data){
+                    check_types(working_int, tmp);
+                    set_data(hashtable, decl->id, data->dType, (int)tmp, tmp);
+                    def(hashtable, decl->id);
+                }
+
                 float to_expr = traverse_expr(hashtable, to_step->left);
                 float step_expr = traverse_expr(hashtable, to_step->right);
 
@@ -218,8 +309,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 while ((working_int ? data->data : data->fdata) != to_expr)
                 {
                     tmp = traverse_opt_stmts(hashtable, stmnt->other);
-                    if(tmp!=FLT_MAX)
+                    if(tmp!=FLT_MAX){
                         return tmp;
+                    }
                     if (working_int)
                         data->data += (int)step_expr;
                     else
@@ -228,13 +320,11 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 break;
             case READ_L:;
                 tmp = 0;
-                data = search(hashtable, stmnt->id);
-                if(data!=NULL)
-                    data->def++;
-                data = getIdentValue(hashtable, stmnt->id);
                 scanf("%f",&tmp);
                 check_types(strcmp(data->dType, "int")==0, tmp);
-                assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
+                def(hashtable, stmnt->id);
+                data = get_data(hashtable, stmnt->id);
+                set_data(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
                 if (stmnt->val_int==2)
@@ -266,13 +356,13 @@ void set_parameters(struct DataItem** hashtable, struct DataItem** local_table, 
         printf("Error en el numero de parametros\n");
     for (size_t i = 0; i <= depth_right(expr); i++)
     {        
-        struct DataItem* tmp = search(local_table, function->ids[i]);
-        if(tmp!=NULL)
-            tmp->def++;
         float val = traverse_expr(hashtable, expr);
-        struct DataItem* data = getIdentValue(local_table, function->ids[i]);
-        check_types(strcmp(data->dType, "int")==0, val);
-        assignValue(local_table, data->key, data->dType, (int)val, val);
+        struct DataItem* data = get_data_nf(local_table, function->ids[i]);
+        if(data){
+            check_types(strcmp(data->dType, "int")==0, val);
+            set_data(local_table, data->key, data->dType, (int)val, val);
+            def(local_table, function->ids[i]);
+        }
         expr = expr->right;
     }
 }
@@ -280,7 +370,6 @@ void set_parameters(struct DataItem** hashtable, struct DataItem** local_table, 
 float solve_function(struct DataItem** hashtable, struct node* root){
     struct function* function = search_f(function_table, root->id);
     struct DataItem** local_table = copy_table(function->hashtable);
-    // local_table = merge_tables(local_table, function->hashtable);
     if(function==NULL){
         printf("Funcion no declarada, %s\n", root->id);
         exit(1);
@@ -317,9 +406,10 @@ void traverse_tree(struct node *root)
 {
     // print_preorder_complete(root);
     hashtable_global = create_hashtable();
+    hashtable_main = create_hashtable();
     set_declarations(hashtable_global, root->left);
     set_functions(root->right);
-    float result = traverse_opt_stmts(hashtable_global, root->other);
+    float result = traverse_opt_stmts(hashtable_main, root->other);
     if(result!=(float)FLT_MAX)
         printf("Return = %f\n", result);
 }

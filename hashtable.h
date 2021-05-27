@@ -115,7 +115,7 @@ void display(struct DataItem **hashArray)
     for (i = 0; i < SIZE; i++)
     {
         if (hashArray[i] != NULL)
-            printf("%d - (%s, %d, %2f, %s)\n", i, hashArray[i]->key, hashArray[i]->data, hashArray[i]->fdata, hashArray[i]->dType);
+            printf("%d - (%s, %d, %2f, %s, %d)\n", i, hashArray[i]->key, hashArray[i]->data, hashArray[i]->fdata, hashArray[i]->dType, hashArray[i]->def);
     }
     printf("\n");
 }

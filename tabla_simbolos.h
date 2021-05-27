@@ -4,10 +4,6 @@ int yyerror(char const * s);
 
 struct DataItem * getIdentValue(struct DataItem **hashArray, char * ident) {
     struct DataItem * tmp = search(hashArray, ident);
-    if(tmp==NULL || tmp->def == 0){
-        printf("Error, variable no definida %s\n", ident);
-        exit(1);
-    }
     return tmp;
 }
 

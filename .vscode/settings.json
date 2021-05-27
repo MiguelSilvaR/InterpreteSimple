@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "*.lex": "lex",
-        "functional": "cpp"
+        "functional": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
     }
 }
