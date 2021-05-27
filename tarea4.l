@@ -7,7 +7,6 @@
 
 #include "tarea4.tab.h"
 
-
 %}
 /* Reglas auxiliares */
 LETRA [A-Za-z]

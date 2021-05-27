@@ -68,15 +68,12 @@ decl_lst : decl SEMICOLON decl_lst
 
 decl : IDENT ASSIGN_TYPE tipo                                    
      {
-          char* id = (char*)malloc(sizeof(char)*10);
           struct node *var = (struct node *)malloc(sizeof(struct node));
-          strcpy(id, "decl_");
-          strcat(id, $1);
           if(strcmp($3, "int")==0)
                var = create_node($1,INTT,0,0,NULL,NULL,NULL);
           else if(strcmp($3, "float")==0)
                var = create_node($1,FLOATT,0,0,NULL,NULL,NULL);
-          $$ = create_node(id,DECL,0,0,var,NULL,NULL);
+          $$ = create_node($1,DECL,0,0,var,NULL,NULL);
      }
 ;
 

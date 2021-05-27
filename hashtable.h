@@ -44,6 +44,11 @@ struct DataItem *search(struct DataItem **hashArray, char *key)
 
 void insert(struct DataItem **hashArray, char *key, int data, float fdata, char *dType)
 {
+    int hashIndex = hashCode(key);
+    if (hashArray[hashIndex] != NULL && strcmp(hashArray[hashIndex]->key, key) == 0){
+        printf("Variable already defined in local scope");
+        exit(1);
+    }
     struct DataItem *item = (struct DataItem *)malloc(sizeof(struct DataItem));
     if (strcmp(dType, "float") == 0)
         item->fdata = fdata;
@@ -51,13 +56,33 @@ void insert(struct DataItem **hashArray, char *key, int data, float fdata, char 
         item->data = data;
     item->key = strdup(key);
     item->dType = strdup(dType);
-    int hashIndex = hashCode(key);
     while (hashArray[hashIndex] != NULL && hashArray[hashIndex]->key != NULL)
     {
         ++hashIndex;
         hashIndex %= SIZE;
     }
     hashArray[hashIndex] = item;
+}
+
+struct DataItem* copy(struct DataItem *hashArray){
+    struct DataItem* tmp = (struct DataItem*)malloc(sizeof(struct DataItem));
+    if(hashArray && hashArray->key){
+        tmp->key = strdup(hashArray->key);
+        tmp->dType = strdup(hashArray->dType);
+        tmp->data = hashArray->data;
+        tmp->fdata = hashArray->fdata;
+        return tmp;
+    }
+    else{
+        return NULL;
+    }
+}
+
+struct DataItem** copy_table(struct DataItem **hashArray){
+    struct DataItem** tmp = create_hashtable();
+    for (size_t i = 0; i < SIZE; i++)
+        tmp[i] = copy(hashArray[i]);
+    return tmp;
 }
 
 struct DataItem *removeItem(struct DataItem **hashArray, char * key)
@@ -76,6 +101,11 @@ struct DataItem *removeItem(struct DataItem **hashArray, char * key)
     }
     return NULL;
 }
+
+void declareVariable(struct DataItem **hashArray, char * ident, char * type) {
+    insert(hashArray, ident, 0, 0.0, type);
+}
+
 
 void display(struct DataItem **hashArray)
 {

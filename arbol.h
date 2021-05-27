@@ -89,6 +89,15 @@ int depth_other(struct node* root){
 	return level;
 }
 
+int depth_right(struct node* root){
+	int level = 0;
+	while(root!=NULL){
+		level++;
+		root=root->right;
+	}
+	return level;
+}
+
 void print_node(struct node *node){
 	printf("%p Node[id=%s type=%d int=%d float=%f left=%p right=%p other=%p]\n", node, node->id,node->nodeType,node->val_int,node->val_float,node->left,node->right, node->other);
 }

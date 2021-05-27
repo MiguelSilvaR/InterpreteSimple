@@ -2,12 +2,12 @@
 
 int yyerror(char const * s);
 
-void declareVariable(struct DataItem **hashArray, char * ident, char * type) {
-    insert(hashArray, ident, 0, 0.0, type);
-}
-
 struct DataItem * getIdentValue(struct DataItem **hashArray, char * ident) {
     struct DataItem * tmp = search(hashArray, ident);
+    if(tmp==NULL){
+        printf("Error, variable no declarada %s\n", ident);
+        exit(1);
+    }
     return tmp;
 }
 
