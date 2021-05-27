@@ -30,6 +30,7 @@ BLANKSPACE([ ])+
 "read"                                          {return READ;}
 "print"                                         {return PRINT;}
 "printe"                                        {return PRINTE;}
+"prints"                                        {return PRINTS;}
 "fun"                                           {return FUN;}
 "return"                                        {return RETURN;}
 
@@ -50,6 +51,7 @@ BLANKSPACE([ ])+
 ">="                                            {return MOREEQTH;}
 
 ({LETRA}|"_"|"$")({LETRA}|{DIGITO}|"_"|"$")*    {yylval.tipo = strdup(yytext);return IDENT;}
+\"({LETRA}|{DIGITO}|" "|"\\n")*\"               {yylval.tipo = strdup(yytext);return STR;}
 ([1-9]{DIGITO}*)|0                              {yylval.intVal = atoi(yytext);return ENT;}
 (([1-9]{DIGITO}*)|0)"."{DIGITO}{DIGITO}*        {yylval.floatVal = atof(yytext);return FLOTANTE;}
 

@@ -8,6 +8,20 @@ float solve_function(struct DataItem** hashtable, struct node *root);
 struct DataItem **hashtable_global;
 struct function **function_table;
 
+char* parse(char* str){
+    int index = 1;
+    while(str[index+1]!='\0'){
+        if (str[index]=='\\' && str[index+1] == 'n')
+        {
+            printf("\n");
+            index+=2;
+        }        
+        else{
+            printf("%c",str[index++]);
+        }
+    }
+}
+
 void set_declarations(struct DataItem **hashtable, struct node *node)
 {
     while (node != NULL)
@@ -223,17 +237,21 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 assignValue(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
-                tmp = traverse_expr(hashtable, stmnt->left);
-                if(floorf(tmp) == tmp)
-                    if(stmnt->val_int)
-                        printf("%d", (int)tmp);
+                if (stmnt->val_int==2)
+                    parse(stmnt->id);
+                else{
+                    tmp = traverse_expr(hashtable, stmnt->left);
+                    if(floorf(tmp) == tmp)
+                        if(stmnt->val_int)
+                            printf("%d", (int)tmp);
+                        else
+                            printf("%d\n", (int)tmp);
                     else
-                        printf("%d\n", (int)tmp);
-                else
-                    if(stmnt->val_int)
-                        printf("%f", tmp);
-                    else
-                        printf("%f\n", tmp);
+                        if(stmnt->val_int)
+                            printf("%f", tmp);
+                        else
+                            printf("%f\n", tmp);
+                }
                 break;
             case RTRN:;
                 return traverse_expr(hashtable, root->left->left);
@@ -243,36 +261,37 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
     return FLT_MAX; //Void
 }
 
-void set_parameters(struct DataItem** hashtable, struct DataItem** myTable, struct function* function, struct node* expr){
+void set_parameters(struct DataItem** hashtable, struct DataItem** local_table, struct function* function, struct node* expr){
     if(depth_right(expr)!=depth_other(function->params))
         printf("Error en el numero de parametros\n");
     for (size_t i = 0; i <= depth_right(expr); i++)
     {        
-        struct DataItem* tmp = search(myTable, function->ids[i]);
+        struct DataItem* tmp = search(local_table, function->ids[i]);
         if(tmp!=NULL)
             tmp->def++;
         float val = traverse_expr(hashtable, expr);
-        struct DataItem* data = getIdentValue(myTable, function->ids[i]);
+        struct DataItem* data = getIdentValue(local_table, function->ids[i]);
         check_types(strcmp(data->dType, "int")==0, val);
-        assignValue(myTable, data->key, data->dType, (int)val, val);
+        assignValue(local_table, data->key, data->dType, (int)val, val);
         expr = expr->right;
     }
 }
 
 float solve_function(struct DataItem** hashtable, struct node* root){
     struct function* function = search_f(function_table, root->id);
-    struct DataItem** myTable = copy_table(function->hashtable);
+    struct DataItem** local_table = copy_table(function->hashtable);
+    // local_table = merge_tables(local_table, function->hashtable);
     if(function==NULL){
         printf("Funcion no declarada, %s\n", root->id);
         exit(1);
     }
-    set_parameters(hashtable, myTable, function, root->left);
-    set_declarations(myTable, function->decl);
+    set_parameters(hashtable, local_table, function, root->left);
+    set_declarations(local_table, function->decl);
     if(function->stmnts==NULL){
         printf("Function not defined %s\n", function->id);
         exit(1);
     }
-    float result = traverse_opt_stmts(myTable, function->stmnts);
+    float result = traverse_opt_stmts(local_table, function->stmnts);
     check_types(strcmp(function->return_type == 0 ? "int":"float", "int")==0, result);
     return function->return_type == 0 ? (int)result:result;
 }

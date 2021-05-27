@@ -24,7 +24,7 @@ int flag_function_expr = 0;
    que hay que incluir en el archivo de flex. */
 
 %token BEGIN_STMT END_STMT IF FI ELSE WHILE 
-        FOR TO STEP DO READ PRINT PRINTE SEMICOLON ASSIGN_TYPE ASSIGN_VALUE 
+        FOR TO STEP DO READ PRINT PRINTE PRINTS SEMICOLON ASSIGN_TYPE ASSIGN_VALUE 
         OPEN_PAREN CLOSE_PAREN SUM SUBST MULT DIV LESSTH MORETH EQUAL 
         LESSEQTH MOREEQTH FUN RETURN COMA
 %start prog
@@ -38,7 +38,7 @@ int flag_function_expr = 0;
 
 %token <floatVal> FLOTANTE
 %token <intVal> ENT 
-%token <tipo>  INT_DEF FLOAT_DEF IDENT
+%token <tipo>  INT_DEF FLOAT_DEF IDENT STR
 
 %type <tipo>   tipo
 %type <node>   decl decl_lst opt_decls prog opt_stmts stmt stmt_lst expr term factor expresion
@@ -171,6 +171,11 @@ stmt : IDENT ASSIGN_VALUE expr
      | PRINTE expr
      {
           struct node* tmp = create_node("printe_expr", PRINT_L, 1, 0, $2, NULL, NULL);
+          $$ = create_node("stmnt", STMNT, 0, 0, tmp, NULL, NULL);
+     }
+     | PRINTS STR
+     {
+          struct node* tmp = create_node($2, PRINT_L, 2, 0, NULL, NULL, NULL);
           $$ = create_node("stmnt", STMNT, 0, 0, tmp, NULL, NULL);
      }
      | BEGIN_STMT opt_stmts END_STMT
