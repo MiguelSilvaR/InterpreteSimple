@@ -4,7 +4,11 @@
    consisten �nicamente de sumas, restas, multiplicaciones y divisiones de
    n�meros enteros.
 
-   Autor: Miguel Silva Ramos, Oscar Barbosa Aquino, Fernando Rodríguez Robles*/
+   Autor: Miguel Silva Ramos - A01328387, Oscar Barbosa Aquino - A01329173, Fernando Rodríguez Robles - A01328720
+   
+   Para correrlo usar run.sh
+
+   ./run.sh nombre_archivo_codigo nombre_opcional_entrada_redirigida 
 
 %{
 #include "operations.h"
