@@ -1,0 +1,10 @@
+x : int;
+y : float
+begin
+    read x;
+    read y;
+    if (x < 5)
+        print x
+    else
+        print y
+end

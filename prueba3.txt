@@ -1,0 +1,5 @@
+x : int
+begin
+  x <- 2;
+  y <- 3.2
+end

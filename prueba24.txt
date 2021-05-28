@@ -1,0 +1,29 @@
+l : int;
+t : int
+fun first(x:int, y:int) : int
+    z : int
+    begin
+        z <- x + y;
+        return z
+    end
+
+fun pow(r:int) : int
+    sq : int
+    begin
+        sq <- (r*r);
+        return sq
+    end
+
+fun fact(m:int) : int
+    f : int
+    begin
+        if (m = 0)
+            return 1
+        else
+            f <- (m * fact(m-1))
+            return f
+    end
+
+begin
+    print fact(pow(first(3,4)))
+end
