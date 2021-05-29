@@ -1,0 +1,9 @@
+x : int;
+z : int;
+y : float
+begin
+  x <- 2;
+  z <- 3.2;
+  print x;
+  print z
+end

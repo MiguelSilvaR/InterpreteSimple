@@ -1,0 +1,17 @@
+fun first(x:int, y:int) : int
+    z : int
+    begin
+        z <- x + y;
+        return z
+    end
+
+fun pow(r:int) : int
+    sq : int
+    begin
+        sq <- (r*r);
+        return sq
+    end
+
+begin
+    print pow(first(3,4))
+end

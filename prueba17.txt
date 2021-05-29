@@ -1,0 +1,8 @@
+x : int
+begin
+    x <- 5;
+    if (x >= 4)
+        x <- x + 1
+    fi;
+    print x
+end

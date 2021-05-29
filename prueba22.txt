@@ -1,0 +1,10 @@
+fun first(x:int, y:int) : int
+    z : int
+    begin
+        z <- x + y;
+        return z
+    end
+
+begin
+    print first(3,4)
+end
