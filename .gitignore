@@ -1,4 +1,7 @@
 *.out
-tarea4.tab.*
-*.txt
+.vscode
+teemo.tab.*
 lex.yy.*
+*.pdf
+program
+out

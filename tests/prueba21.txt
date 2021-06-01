@@ -1,0 +1,18 @@
+x : int;
+y : int
+begin
+    read x;
+    read y;
+    if (x < y)
+        begin
+            x <- x + 1;
+            y <- x + 2*x
+        end
+    else
+        begin
+            x <- x * 2;
+            y <- (2+1) * (y + x)
+        end;
+    print y;
+    print x
+end

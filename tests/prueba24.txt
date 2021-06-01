@@ -1,0 +1,30 @@
+l : int
+fun fr(x:int, y:int) : int
+    z : int
+    begin
+        z <- x + y;
+        return z
+    end
+
+fun pow(r:int) : int
+    sq : int
+    begin
+        sq <- (r*r);
+        return sq
+    end
+
+fun mult(m:int) : int
+    f : int;
+    w : int
+    begin
+        w <- 8;
+        if (m = 0)
+            return 1
+        else
+            f <- (m * w);
+            return f
+    end
+
+begin
+    print mult(pow(fr(3,4)))
+end
