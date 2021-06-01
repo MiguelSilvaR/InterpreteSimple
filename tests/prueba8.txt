@@ -4,7 +4,7 @@ z : int;
 k : int
 begin
   x <- 2;
-  y <- 4;
+  read y;
   z <- x + y;
   k <- (z * 2) / 2;
   print k

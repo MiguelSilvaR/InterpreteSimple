@@ -319,12 +319,13 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
                 }
                 break;
             case READ_L:;
-                tmp = 0;
-                scanf("%f",&tmp);
+                char* str = (char *)malloc(sizeof(char)*15);
+                scanf("%s",str);
+                float number = atof(str);
                 def(hashtable, stmnt->id);
                 data = get_data(hashtable, stmnt->id);
-                check_types(strcmp(data->dType, "int")==0, tmp);
-                set_data(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
+                check_types(strcmp(data->dType, "int")==0, number);
+                set_data(hashtable, stmnt->id, data->dType, (int)number, number);
                 break;
             case PRINT_L:
                 if (stmnt->val_int==2)

@@ -9,9 +9,9 @@ do
     file1="tests/prueba${c}_out.txt"
     file2="tests/out${c}.txt"
     if cmp -s "$file1" "$file2"; then
-        printf "TEST${c}\t${GREEN}passed\n${NC}"
+        printf "TEST_${c}\t${GREEN}passed\n${NC}"
     else
-        printf "TEST${c}\t${RED}failed\n${NC}"
+        printf "TEST_${c}\t${RED}failed\n${NC}"
     fi
     eval "rm tests/out${c}.txt"
 done
