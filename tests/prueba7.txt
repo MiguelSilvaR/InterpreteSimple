@@ -8,7 +8,6 @@ begin
     x <- 4
   fi;
   read a;
-  a <- 4.0;
   if (a > 3.5)
     b <- 3.1
   else

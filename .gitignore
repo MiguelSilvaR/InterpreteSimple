@@ -1,11 +1,7 @@
 *.out
 .vscode
-tarea4.tab.*
-*.txt
+teemo.tab.*
 lex.yy.*
 *.pdf
-in*
 program
 out
-tests_oliart
-tests_fer

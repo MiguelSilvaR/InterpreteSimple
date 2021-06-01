@@ -1,0 +1,62 @@
+r: int;
+void: int
+
+fun factorial(x: int) : int
+    begin
+        if (x=0)
+            return 1
+        else
+            return x * factorial(x-1)
+    end
+
+fun fibonacci(x: int) : int
+    begin
+        if(x=0)
+            return 1
+        fi;
+        if(x=1)
+            return 1
+        fi;
+        return fibonacci(x-1) + fibonacci(x-2)
+    end
+
+fun pow(x:int, y:int) : float
+    i: int
+    begin
+        r<-1;
+        for i <- 0 to y step 1 do
+            r <- r*x;
+        return r
+    end
+
+fun square(area: int) : int
+    i: int;
+    j: int
+    begin
+        for i <- 0 to area step 1 do
+            begin
+                if(i=0)
+                    for j <- 0 to area step 1 do
+                        prints "-"
+                else
+                    if(i<area-1)
+                        begin
+                            prints "-";
+                            for j <- 1 to area-1 step 1 do
+                                prints " ";
+                            prints "-"                    
+                        end
+                    fi;
+                if(i=area-1)
+                    for j <- 0 to area step 1 do
+                        prints "-"
+                fi;
+                prints "\n"
+            end
+    end
+
+begin
+    prints "Oscar estuvo aqui\n";
+    void<-square(30);
+    print pow(factorial(fibonacci(3)),4)
+end

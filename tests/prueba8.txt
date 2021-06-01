@@ -3,7 +3,7 @@ y : int;
 z : int;
 k : int
 begin
-  x <-2;
+  x <- 2;
   y <- 4;
   z <- x + y;
   k <- (z * 2) / 2;

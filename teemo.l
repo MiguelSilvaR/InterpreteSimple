@@ -5,12 +5,13 @@
 #include<stdlib.h>
 #include<string.h>
 
-#include "tarea4.tab.h"
+#include "teemo.tab.h"
 
 %}
 /* Reglas auxiliares */
 LETRA [A-Za-z]
 DIGITO [0-9]
+SYMBOLS [#-~]
 BLANKSPACE([ ])+
 
 %%
@@ -51,7 +52,7 @@ BLANKSPACE([ ])+
 ">="                                            {return MOREEQTH;}
 
 ({LETRA}|"_"|"$")({LETRA}|{DIGITO}|"_"|"$")*    {yylval.tipo = strdup(yytext);return IDENT;}
-\"({LETRA}|{DIGITO}|" "|"\\n")*\"               {yylval.tipo = strdup(yytext);return STR;}
+\"({SYMBOLS}|{BLANKSPACE}|"\\n")*\"               {yylval.tipo = strdup(yytext);return STR;}
 ([1-9]{DIGITO}*)|0                              {yylval.intVal = atoi(yytext);return ENT;}
 (([1-9]{DIGITO}*)|0)"."{DIGITO}{DIGITO}*        {yylval.floatVal = atof(yytext);return FLOTANTE;}
 

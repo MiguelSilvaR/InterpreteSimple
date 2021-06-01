@@ -321,9 +321,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
             case READ_L:;
                 tmp = 0;
                 scanf("%f",&tmp);
-                check_types(strcmp(data->dType, "int")==0, tmp);
                 def(hashtable, stmnt->id);
                 data = get_data(hashtable, stmnt->id);
+                check_types(strcmp(data->dType, "int")==0, tmp);
                 set_data(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                 break;
             case PRINT_L:
