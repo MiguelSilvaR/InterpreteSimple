@@ -50,10 +50,12 @@ struct DataItem *get_data(struct DataItem **hashtable, char* key){
     }
     else{
         tmp = search(hashtable_global, key); //Buscar en global
-        if(tmp==NULL)
-            return NULL;
-        if(tmp->def==0){
+        if(!tmp){
             printf("get_data: Variable not declared %s\n", key);
+            exit(1);
+        }
+        if(tmp->def==0){
+            printf("get_data: Variable not defined %s\n", key);
             exit(1);
         }
         return tmp;
@@ -233,13 +235,6 @@ void check_types(int working_int, float tmp)
     }
 }
 
-void check_if_def(struct DataItem* tmp, char* key){
-    if(tmp==NULL || tmp->def == 0){
-        printf("Error, variable not defined %s\n", key);
-        exit(1);
-    }
-}
-
 float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
 {
     while (root != NULL)
@@ -250,9 +245,9 @@ float traverse_opt_stmts(struct DataItem **hashtable, struct node *root)
         switch (stmnt->nodeType)
         {
             case DECL:;
-                tmp = traverse_expr(hashtable, stmnt->left);
                 data = get_data_nf(hashtable, stmnt->id);
                 if(data){
+                    tmp = traverse_expr(hashtable, stmnt->left);
                     check_types(strcmp(data->dType, "int")==0, tmp);
                     set_data(hashtable, stmnt->id, data->dType, (int)tmp, tmp);
                     def(hashtable, stmnt->id);
